@@ -34,7 +34,7 @@ func (lotteries Lotteries) Draw() string {
 	return ""
 }
 
-func InitLotteries(mul float64, data ...Lottery) (*Lotteries, error) {
+func InitLotteries(data []Lottery, mul float64) (*Lotteries, error) {
 	if len(data) == 0 {
 		return nil, errors.New("lotteries must be greater than 0")
 	}

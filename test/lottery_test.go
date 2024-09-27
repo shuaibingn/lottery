@@ -13,32 +13,14 @@ type Data struct {
 }
 
 func TestDraw(t *testing.T) {
-	lotteries, err := lottery.InitLotteries(10000,
-		&Data{
-			DrawBase: &lottery.DrawBase{
-				ID:          "SSR",
-				Probability: 0.1,
-			},
-		},
-		&Data{
-			DrawBase: &lottery.DrawBase{
-				ID:          "SR",
-				Probability: 0.2,
-			},
-		},
-		&Data{
-			DrawBase: &lottery.DrawBase{
-				ID:          "R",
-				Probability: 0.3,
-			},
-		},
-		&Data{
-			DrawBase: &lottery.DrawBase{
-				ID:          "N",
-				Probability: 0.4,
-			},
-		},
-	)
+	data := []lottery.Lottery{
+		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
+		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
+		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
+		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
+	}
+
+	lotteries, err := lottery.InitLotteries(data, 10000)
 	if err != nil {
 		panic(err)
 	}
