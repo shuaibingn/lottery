@@ -5,35 +5,35 @@ import (
 	"testing"
 	"time"
 
-	pkg "lottery"
+	"github.com/shuaibingn/lottery"
 )
 
 type Data struct {
-	*pkg.DrawBase
+	*lottery.DrawBase
 }
 
 func TestDraw(t *testing.T) {
-	lotteries, err := pkg.InitLotteries(10000,
+	lotteries, err := lottery.InitLotteries(10000,
 		&Data{
-			DrawBase: &pkg.DrawBase{
+			DrawBase: &lottery.DrawBase{
 				ID:          "SSR",
 				Probability: 0.1,
 			},
 		},
 		&Data{
-			DrawBase: &pkg.DrawBase{
+			DrawBase: &lottery.DrawBase{
 				ID:          "SR",
 				Probability: 0.2,
 			},
 		},
 		&Data{
-			DrawBase: &pkg.DrawBase{
+			DrawBase: &lottery.DrawBase{
 				ID:          "R",
 				Probability: 0.3,
 			},
 		},
 		&Data{
-			DrawBase: &pkg.DrawBase{
+			DrawBase: &lottery.DrawBase{
 				ID:          "N",
 				Probability: 0.4,
 			},
