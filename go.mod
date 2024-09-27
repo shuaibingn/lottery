@@ -1,3 +1,3 @@
-module lottery
+module github.com/shuaibingn/lottery
 
 go 1.22
