@@ -1,8 +1,8 @@
 package lottery
 
-// Lottery 抽奖接口
+// Item 抽奖奖品接口
 // 所有奖品类型都需要实现此接口
-type Lottery interface {
+type Item interface {
 	// getProbability 获取奖品的抽中概率（0.0 - 1.0）
 	getProbability() float64
 	
@@ -11,7 +11,7 @@ type Lottery interface {
 }
 
 // DrawBase 抽奖基础结构
-// 用户可以嵌入此结构来快速实现 Lottery 接口
+// 用户可以嵌入此结构来快速实现 Item 接口
 //
 // 示例：
 //   type Prize struct {

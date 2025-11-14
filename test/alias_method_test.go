@@ -14,16 +14,16 @@ type Data struct {
 	*lottery.DrawBase
 }
 
-// TestAliasMethod 测试 Alias Method 无锁版本（单线程）
-func TestAliasMethod(t *testing.T) {
-	data := []lottery.Lottery{
+// TestLottery 测试无锁版本抽奖器（单线程）
+func TestLottery(t *testing.T) {
+	data := []lottery.Item{
 		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
 		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
 		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
 		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
 	}
 
-	aliasMethod, err := lottery.NewAliasMethod(data)
+	lotteries, err := lottery.New(data)
 	if err != nil {
 		panic(err)
 	}
@@ -31,7 +31,7 @@ func TestAliasMethod(t *testing.T) {
 	start := time.Now().UnixNano()
 	result := make(map[string]int)
 	for i := 0; i < 100000; i++ {
-		id := aliasMethod.Draw()
+		id := lotteries.Draw()
 		if _, ok := result[id]; ok {
 			result[id]++
 			continue
@@ -39,19 +39,19 @@ func TestAliasMethod(t *testing.T) {
 		result[id] = 1
 	}
 	end := time.Now().UnixNano()
-	fmt.Println("Alias Method 无锁版本（单线程）:", result, end-start, "ns")
+	fmt.Println("无锁版本（单线程）:", result, end-start, "ns")
 }
 
-// TestAliasMethodPool 测试 Alias Method Pool 版本（单线程）
-func TestAliasMethodPool(t *testing.T) {
-	data := []lottery.Lottery{
+// TestPool 测试线程安全抽奖器（单线程）
+func TestPool(t *testing.T) {
+	data := []lottery.Item{
 		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
 		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
 		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
 		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
 	}
 
-	aliasMethodPool, err := lottery.NewAliasMethodPool(data)
+	pool, err := lottery.NewPool(data)
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +59,7 @@ func TestAliasMethodPool(t *testing.T) {
 	start := time.Now().UnixNano()
 	result := make(map[string]int)
 	for i := 0; i < 100000; i++ {
-		id := aliasMethodPool.Draw()
+		id := pool.Draw()
 		if _, ok := result[id]; ok {
 			result[id]++
 			continue
@@ -67,19 +67,19 @@ func TestAliasMethodPool(t *testing.T) {
 		result[id] = 1
 	}
 	end := time.Now().UnixNano()
-	fmt.Println("Alias Method Pool 版本（单线程）:", result, end-start, "ns")
+	fmt.Println("Pool 版本（单线程）:", result, end-start, "ns")
 }
 
-// TestAliasMethodPoolConcurrent 测试 Alias Method Pool 版本的并发安全性
-func TestAliasMethodPoolConcurrent(t *testing.T) {
-	data := []lottery.Lottery{
+// TestPoolConcurrent 测试线程安全抽奖器的并发安全性
+func TestPoolConcurrent(t *testing.T) {
+	data := []lottery.Item{
 		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
 		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
 		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
 		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
 	}
 
-	aliasMethodPool, err := lottery.NewAliasMethodPool(data)
+	pool, err := lottery.NewPool(data)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +96,7 @@ func TestAliasMethodPoolConcurrent(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < drawsPerWorker; j++ {
-				_ = aliasMethodPool.Draw()
+				_ = pool.Draw()
 			}
 		}()
 	}
@@ -105,18 +105,18 @@ func TestAliasMethodPoolConcurrent(t *testing.T) {
 	elapsed := time.Since(start)
 
 	totalDraws := workers * drawsPerWorker
-	t.Logf("✓ Alias Method Pool 并发测试完成: %d个goroutine, 总计%d次抽奖, 耗时%v", workers, totalDraws, elapsed)
+	t.Logf("✓ Pool 并发测试完成: %d个goroutine, 总计%d次抽奖, 耗时%v", workers, totalDraws, elapsed)
 	t.Logf("  平均每次抽奖: %v", elapsed/time.Duration(totalDraws))
 }
 
-// TestAliasMethodProbability 测试 Alias Method 概率准确性
-func TestAliasMethodProbability(t *testing.T) {
-	data := []lottery.Lottery{
-		&Data{&lottery.DrawBase{ID: "rare", Probability: 0.01}},    // 1%
-		&Data{&lottery.DrawBase{ID: "common", Probability: 0.99}},  // 99%
+// TestProbability 测试抽奖概率准确性
+func TestProbability(t *testing.T) {
+	data := []lottery.Item{
+		&Data{&lottery.DrawBase{ID: "rare", Probability: 0.01}},   // 1%
+		&Data{&lottery.DrawBase{ID: "common", Probability: 0.99}}, // 99%
 	}
 
-	aliasMethod, err := lottery.NewAliasMethod(data)
+	lotteries, err := lottery.New(data)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,9 +124,9 @@ func TestAliasMethodProbability(t *testing.T) {
 	// 大量测试验证概率
 	const testCount = 1000000
 	result := make(map[string]int)
-	
+
 	for i := 0; i < testCount; i++ {
-		id := aliasMethod.Draw()
+		id := lotteries.Draw()
 		result[id]++
 	}
 
@@ -143,4 +143,3 @@ func TestAliasMethodProbability(t *testing.T) {
 		t.Errorf("common 概率异常: %.4f%%, 期望 99%%", commonRate*100)
 	}
 }
-

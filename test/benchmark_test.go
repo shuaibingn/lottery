@@ -8,14 +8,14 @@ import (
 
 // BenchmarkAliasMethod_4Items 测试 4 个奖项的性能
 func BenchmarkAliasMethod_4Items(b *testing.B) {
-	data := []lottery.Lottery{
+	data := []lottery.Item{
 		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
 		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
 		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
 		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
 	}
 
-	aliasMethod, err := lottery.NewAliasMethod(data)
+	aliasMethod, err := lottery.New(data)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -28,13 +28,13 @@ func BenchmarkAliasMethod_4Items(b *testing.B) {
 
 // BenchmarkAliasMethod_100Items 测试 100 个奖项的性能
 func BenchmarkAliasMethod_100Items(b *testing.B) {
-	data := make([]lottery.Lottery, 100)
+	data := make([]lottery.Item, 100)
 	prob := 1.0 / 100.0
 	for i := 0; i < 100; i++ {
 		data[i] = &Data{&lottery.DrawBase{ID: string(rune('A' + i%26)), Probability: prob}}
 	}
 
-	aliasMethod, err := lottery.NewAliasMethod(data)
+	aliasMethod, err := lottery.New(data)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -47,14 +47,14 @@ func BenchmarkAliasMethod_100Items(b *testing.B) {
 
 // BenchmarkAliasMethodPool_4Items 测试 Pool 版本的性能（4 个奖项）
 func BenchmarkAliasMethodPool_4Items(b *testing.B) {
-	data := []lottery.Lottery{
+	data := []lottery.Item{
 		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
 		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
 		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
 		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
 	}
 
-	aliasMethodPool, err := lottery.NewAliasMethodPool(data)
+	aliasMethodPool, err := lottery.NewPool(data)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -67,13 +67,13 @@ func BenchmarkAliasMethodPool_4Items(b *testing.B) {
 
 // BenchmarkAliasMethodPool_100Items 测试 Pool 版本的性能（100 个奖项）
 func BenchmarkAliasMethodPool_100Items(b *testing.B) {
-	data := make([]lottery.Lottery, 100)
+	data := make([]lottery.Item, 100)
 	prob := 1.0 / 100.0
 	for i := 0; i < 100; i++ {
 		data[i] = &Data{&lottery.DrawBase{ID: string(rune('A' + i%26)), Probability: prob}}
 	}
 
-	aliasMethodPool, err := lottery.NewAliasMethodPool(data)
+	aliasMethodPool, err := lottery.NewPool(data)
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -86,14 +86,14 @@ func BenchmarkAliasMethodPool_100Items(b *testing.B) {
 
 // BenchmarkAliasMethodPool_Parallel 测试并发性能
 func BenchmarkAliasMethodPool_Parallel(b *testing.B) {
-	data := []lottery.Lottery{
+	data := []lottery.Item{
 		&Data{&lottery.DrawBase{ID: "1", Probability: 0.1}},
 		&Data{&lottery.DrawBase{ID: "2", Probability: 0.2}},
 		&Data{&lottery.DrawBase{ID: "3", Probability: 0.3}},
 		&Data{&lottery.DrawBase{ID: "4", Probability: 0.4}},
 	}
 
-	aliasMethodPool, err := lottery.NewAliasMethodPool(data)
+	aliasMethodPool, err := lottery.NewPool(data)
 	if err != nil {
 		b.Fatal(err)
 	}

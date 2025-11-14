@@ -93,7 +93,7 @@ func main() {
     }
     
     // Initialize lock-free lottery (O(1), fastest for single-thread)
-    lotteries, _ := lottery.NewAliasMethod(prizes)
+    lotteries, _ := lottery.New(prizes)
     
     // Draw a prize
     result := lotteries.Draw()
@@ -116,7 +116,7 @@ type Prize struct {
     *lottery.DrawBase
 }
 
-var globalLotteries *lottery.AliasMethodPool
+var globalLotteries *lottery.Pool
 
 func init() {
     // Define prizes (probabilities must sum to 1.0)
@@ -129,7 +129,7 @@ func init() {
     }
     
     // Initialize thread-safe lottery (sync.Pool, O(1), high-performance)
-    globalLotteries, _ = lottery.NewAliasMethodPool(prizes)
+    globalLotteries, _ = lottery.NewPool(prizes)
 }
 
 func main() {
@@ -157,10 +157,10 @@ func main() {
 
 ```go
 // Lock-free version (single-thread or isolated per goroutine)
-aliasMethod, err := lottery.NewAliasMethod(prizes)
+aliasMethod, err := lottery.New(prizes)
 
 // Thread-safe version (high-concurrency shared instance) ⭐ Recommended
-aliasMethodPool, err := lottery.NewAliasMethodPool(prizes)
+aliasMethodPool, err := lottery.NewPool(prizes)
 ```
 
 ### Draw Method
@@ -251,24 +251,24 @@ prizes := []lottery.Lottery{
 
 ```go
 // ✅ Single-thread or isolated per goroutine
-aliasMethod, _ := lottery.NewAliasMethod(prizes)
+aliasMethod, _ := lottery.New(prizes)
 
 // ✅ High-concurrency shared instance (Recommended) ⭐
-aliasMethodPool, _ := lottery.NewAliasMethodPool(prizes)
+aliasMethodPool, _ := lottery.NewPool(prizes)
 ```
 
 ### 2. Global Singleton Pattern (Recommended)
 
 ```go
 var (
-    globalLotteries *lottery.AliasMethodPool
+    globalLotteries *lottery.Pool
     once            sync.Once
 )
 
-func GetLotteries() *lottery.AliasMethodPool {
+func GetLotteries() *lottery.Pool {
     once.Do(func() {
         prizes := []lottery.Lottery{ /* ... */ }
-        globalLotteries, _ = lottery.NewAliasMethodPool(prizes)
+        globalLotteries, _ = lottery.NewPool(prizes)
     })
     return globalLotteries
 }
@@ -335,9 +335,9 @@ go test -race ./test/
 go test -bench=. -benchmem ./test/
 
 # Expected output (after XorShift64 optimization):
-BenchmarkAliasMethod_4Items-10              	xxx,xxx,xxx    ~5.2 ns/op    0 B/op    0 allocs/op
-BenchmarkAliasMethod_100Items-10            	xxx,xxx,xxx    ~3.5 ns/op    0 B/op    0 allocs/op
-BenchmarkAliasMethodPool_Parallel-10        	xxx,xxx,xxx    ~1.8 ns/op    0 B/op    0 allocs/op  ⚡⚡⚡
+BenchmarkLottery_4Items-10              	xxx,xxx,xxx    ~5.2 ns/op    0 B/op    0 allocs/op
+BenchmarkLottery_100Items-10            	xxx,xxx,xxx    ~3.5 ns/op    0 B/op    0 allocs/op
+BenchmarkPool_Parallel-10        	xxx,xxx,xxx    ~1.8 ns/op    0 B/op    0 allocs/op  ⚡⚡⚡
 ```
 
 ### Key Performance Metrics
@@ -365,17 +365,17 @@ BenchmarkAliasMethodPool_Parallel-10        	xxx,xxx,xxx    ~1.8 ns/op    0 B/op
 - ✅ **For lottery scenarios**: Completely safe, excellent randomness
 - ❌ **For cryptography**: Not safe, use crypto/rand
 
-### Q: AliasMethod or AliasMethodPool?
+### Q: Lottery or Pool?
 
 **A:** 
-- Single-thread or isolated per goroutine → `NewAliasMethod()`
-- High-concurrency shared instance → `NewAliasMethodPool()` ⭐ **Recommended**
+- Single-thread or isolated per goroutine → `NewLottery()`
+- High-concurrency shared instance → `NewPool()` ⭐ **Recommended**
 
 ### Q: What if probabilities don't sum to 1.0?
 
 **A:** The system will automatically detect and return an error:
 ```go
-aliasMethod, err := lottery.NewAliasMethod(prizes)
+aliasMethod, err := lottery.New(prizes)
 if err != nil {
     // err: sum of probabilities must be approximately 1.0
 }

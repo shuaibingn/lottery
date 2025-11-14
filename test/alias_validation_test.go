@@ -11,13 +11,13 @@ import (
 func TestAliasMethodProbabilityValidation(t *testing.T) {
 	tests := []struct {
 		name        string
-		data        []lottery.Lottery
+		data        []lottery.Item
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name: "正确的概率和（1.0）",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: 0.5}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 0.5}},
 			},
@@ -25,7 +25,7 @@ func TestAliasMethodProbabilityValidation(t *testing.T) {
 		},
 		{
 			name: "概率和过小（< 1.0）",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: 0.3}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 0.5}},
 			},
@@ -34,7 +34,7 @@ func TestAliasMethodProbabilityValidation(t *testing.T) {
 		},
 		{
 			name: "概率和过大（> 1.0）",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: 0.7}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 0.5}},
 			},
@@ -43,7 +43,7 @@ func TestAliasMethodProbabilityValidation(t *testing.T) {
 		},
 		{
 			name: "负概率",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: -0.1}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 1.1}},
 			},
@@ -52,7 +52,7 @@ func TestAliasMethodProbabilityValidation(t *testing.T) {
 		},
 		{
 			name: "接近 1.0 的概率（允许误差）",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: 0.33333}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 0.33333}},
 				&Data{&lottery.DrawBase{ID: "3", Probability: 0.33334}},
@@ -63,7 +63,7 @@ func TestAliasMethodProbabilityValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			am, err := lottery.NewAliasMethod(tt.data)
+			am, err := lottery.New(tt.data)
 			
 			if tt.expectError {
 				if err == nil {
@@ -87,13 +87,13 @@ func TestAliasMethodProbabilityValidation(t *testing.T) {
 func TestAliasMethodPoolProbabilityValidation(t *testing.T) {
 	tests := []struct {
 		name        string
-		data        []lottery.Lottery
+		data        []lottery.Item
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name: "正确的概率和（1.0）",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: 0.5}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 0.5}},
 			},
@@ -101,7 +101,7 @@ func TestAliasMethodPoolProbabilityValidation(t *testing.T) {
 		},
 		{
 			name: "概率和不正确",
-			data: []lottery.Lottery{
+			data: []lottery.Item{
 				&Data{&lottery.DrawBase{ID: "1", Probability: 0.3}},
 				&Data{&lottery.DrawBase{ID: "2", Probability: 0.5}},
 			},
@@ -112,7 +112,7 @@ func TestAliasMethodPoolProbabilityValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			amp, err := lottery.NewAliasMethodPool(tt.data)
+			amp, err := lottery.NewPool(tt.data)
 			
 			if tt.expectError {
 				if err == nil {

@@ -93,7 +93,7 @@ func main() {
     }
     
     // Initialize lock-free lottery (O(1), fastest for single-thread)
-    lotteries, _ := lottery.NewAliasMethod(prizes)
+    lotteries, _ := lottery.New(prizes)
     
     // Draw a prize
     result := lotteries.Draw()
@@ -116,7 +116,7 @@ type Prize struct {
     *lottery.DrawBase
 }
 
-var globalLotteries *lottery.AliasMethodPool
+var globalLotteries *lottery.Pool
 
 func init() {
     // Define prizes (probabilities must sum to 1.0)
@@ -129,7 +129,7 @@ func init() {
     }
     
     // Initialize thread-safe lottery (sync.Pool, O(1), high-performance)
-    globalLotteries, _ = lottery.NewAliasMethodPool(prizes)
+    globalLotteries, _ = lottery.NewPool(prizes)
 }
 
 func main() {
@@ -157,10 +157,10 @@ func main() {
 
 ```go
 // 无锁版本（单线程或每个 goroutine 独立实例）
-aliasMethod, err := lottery.NewAliasMethod(prizes)
+aliasMethod, err := lottery.New(prizes)
 
 // 线程安全版本（高并发共享实例）⭐ 推荐
-aliasMethodPool, err := lottery.NewAliasMethodPool(prizes)
+aliasMethodPool, err := lottery.NewPool(prizes)
 ```
 
 ### 抽奖方法
@@ -251,24 +251,24 @@ prizes := []lottery.Lottery{
 
 ```go
 // ✅ 单线程或每个 goroutine 独立实例
-aliasMethod, _ := lottery.NewAliasMethod(prizes)
+aliasMethod, _ := lottery.New(prizes)
 
 // ✅ 高并发共享实例（推荐）⭐
-aliasMethodPool, _ := lottery.NewAliasMethodPool(prizes)
+aliasMethodPool, _ := lottery.NewPool(prizes)
 ```
 
 ### 2. 全局单例模式（推荐）
 
 ```go
 var (
-    globalLotteries *lottery.AliasMethodPool
+    globalLotteries *lottery.Pool
     once            sync.Once
 )
 
-func GetLotteries() *lottery.AliasMethodPool {
+func GetLotteries() *lottery.Pool {
     once.Do(func() {
         prizes := []lottery.Lottery{ /* ... */ }
-        globalLotteries, _ = lottery.NewAliasMethodPool(prizes)
+        globalLotteries, _ = lottery.NewPool(prizes)
     })
     return globalLotteries
 }
@@ -335,9 +335,9 @@ go test -race ./test/
 go test -bench=. -benchmem ./test/
 
 # 预期输出（基于 XorShift64 优化后）：
-BenchmarkAliasMethod_4Items-10              	xxx,xxx,xxx    ~5.2 ns/op    0 B/op    0 allocs/op
-BenchmarkAliasMethod_100Items-10            	xxx,xxx,xxx    ~3.5 ns/op    0 B/op    0 allocs/op
-BenchmarkAliasMethodPool_Parallel-10        	xxx,xxx,xxx    ~1.8 ns/op    0 B/op    0 allocs/op  ⚡⚡⚡
+BenchmarkLottery_4Items-10              	xxx,xxx,xxx    ~5.2 ns/op    0 B/op    0 allocs/op
+BenchmarkLottery_100Items-10            	xxx,xxx,xxx    ~3.5 ns/op    0 B/op    0 allocs/op
+BenchmarkPool_Parallel-10        	xxx,xxx,xxx    ~1.8 ns/op    0 B/op    0 allocs/op  ⚡⚡⚡
 ```
 
 ### 关键性能指标
@@ -365,17 +365,17 @@ BenchmarkAliasMethodPool_Parallel-10        	xxx,xxx,xxx    ~1.8 ns/op    0 B/op
 - ✅ **对于抽奖场景**：完全安全，随机性优秀
 - ❌ **密码学场景**：不安全，请使用 crypto/rand
 
-### Q: 如何选择 AliasMethod 还是 AliasMethodPool？
+### Q: 如何选择 Lottery 还是 Pool？
 
 **A:** 
-- 单线程或每个 goroutine 独立实例 → `NewAliasMethod()`
-- 高并发共享实例 → `NewAliasMethodPool()` ⭐ **推荐**
+- 单线程或每个 goroutine 独立实例 → `NewLottery()`
+- 高并发共享实例 → `NewPool()` ⭐ **推荐**
 
 ### Q: 概率和不等于 1.0 怎么办？
 
 **A:** 系统会自动检测并返回错误：
 ```go
-aliasMethod, err := lottery.NewAliasMethod(prizes)
+aliasMethod, err := lottery.New(prizes)
 if err != nil {
     // err: sum of probabilities must be approximately 1.0
 }

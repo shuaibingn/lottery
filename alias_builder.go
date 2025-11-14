@@ -52,7 +52,7 @@ type aliasTable struct {
 //   - data 为空
 //   - 存在负概率
 //   - 概率和不约等于 1.0
-func buildAliasTables(data []Lottery) (*aliasTable, error) {
+func buildAliasTables(data []Item) (*aliasTable, error) {
 	// ===== 步骤1: 验证输入并初始化 =====
 	if len(data) == 0 {
 		return nil, errors.New("lotteries must be greater than 0")

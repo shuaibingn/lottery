@@ -14,7 +14,7 @@ func main() {
 	fmt.Println("=== 基础用法示例 ===\n")
 
 	// 定义奖品（概率之和必须为 1.0）
-	prizes := []lottery.Lottery{
+	prizes := []lottery.Item{
 		&Prize{&lottery.DrawBase{ID: "特等奖", Probability: 0.001}}, // 0.1%
 		&Prize{&lottery.DrawBase{ID: "一等奖", Probability: 0.009}}, // 0.9%
 		&Prize{&lottery.DrawBase{ID: "二等奖", Probability: 0.09}},  // 9%
@@ -23,7 +23,7 @@ func main() {
 	}
 
 	// 初始化抽奖器（线程安全版本，推荐）
-	lotteries, err := lottery.NewAliasMethodPool(prizes)
+	lotteries, err := lottery.NewPool(prizes)
 	if err != nil {
 		fmt.Printf("初始化失败: %v\n", err)
 		return

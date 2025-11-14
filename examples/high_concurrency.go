@@ -14,11 +14,11 @@ type Prize struct {
 	*lottery.DrawBase
 }
 
-var globalLotteries *lottery.AliasMethodPool
+var globalLotteries *lottery.Pool
 
 func init() {
 	// 定义奖品（概率之和必须为 1.0）
-	prizes := []lottery.Lottery{
+	prizes := []lottery.Item{
 		&Prize{&lottery.DrawBase{ID: "特等奖", Probability: 0.001}}, // 0.1%
 		&Prize{&lottery.DrawBase{ID: "一等奖", Probability: 0.009}}, // 0.9%
 		&Prize{&lottery.DrawBase{ID: "二等奖", Probability: 0.09}},  // 9%
@@ -28,7 +28,7 @@ func init() {
 
 	// 初始化全局抽奖器（线程安全，支持高并发）
 	var err error
-	globalLotteries, err = lottery.NewAliasMethodPool(prizes)
+	globalLotteries, err = lottery.NewPool(prizes)
 	if err != nil {
 		panic(fmt.Sprintf("初始化失败: %v", err))
 	}
