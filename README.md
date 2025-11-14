@@ -60,6 +60,41 @@ go get github.com/shuaibingn/lottery
 
 ## 🎯 Quick Start
 
+### 无锁版本（单线程/独立实例）
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/shuaibingn/lottery"
+)
+
+type Prize struct {
+    *lottery.DrawBase
+}
+
+func main() {
+    // Define prizes (probabilities must sum to 1.0)
+    prizes := []lottery.Lottery{
+        &Prize{&lottery.DrawBase{ID: "Grand Prize", Probability: 0.001}},  // 0.1%
+        &Prize{&lottery.DrawBase{ID: "First Prize", Probability: 0.009}},  // 0.9%
+        &Prize{&lottery.DrawBase{ID: "Second Prize", Probability: 0.09}},  // 9%
+        &Prize{&lottery.DrawBase{ID: "Third Prize", Probability: 0.2}},    // 20%
+        &Prize{&lottery.DrawBase{ID: "Thank You", Probability: 0.7}},      // 70%
+    }
+    
+    // Initialize lock-free lottery (fastest for single-thread)
+    lotteries, _ := lottery.NewLotteries(prizes)
+    
+    // Draw a prize
+    result := lotteries.Draw()
+    fmt.Printf("You won: %s\n", result)
+}
+```
+
+### 线程安全版本（推荐用于高并发场景）
+
 ```go
 package main
 
@@ -85,7 +120,7 @@ func init() {
         &Prize{&lottery.DrawBase{ID: "Thank You", Probability: 0.7}},      // 70%
     }
     
-    // Initialize lottery (thread-safe, high-performance)
+    // Initialize thread-safe lottery (sync.Pool, high-performance)
     globalLotteries, _ = lottery.NewLotteriesPool(prizes)
 }
 
