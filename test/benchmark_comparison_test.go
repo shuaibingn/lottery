@@ -26,7 +26,7 @@ func BenchmarkLockFree_SingleThread(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = lotteries.Draw()
+		_ = lotteries.Draw()
 	}
 }
 
@@ -46,7 +46,7 @@ func BenchmarkPool_SingleThread(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = lotteries.Draw()
+		_ = lotteries.Draw()
 	}
 }
 
@@ -71,7 +71,7 @@ func BenchmarkPool_Parallel(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			_, _ = lotteries.Draw()
+			_ = lotteries.Draw()
 		}
 	})
 }
@@ -97,7 +97,7 @@ func BenchmarkLockFree_LargeItems(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = lotteries.Draw()
+		_ = lotteries.Draw()
 	}
 }
 
@@ -118,7 +118,7 @@ func BenchmarkPool_LargeItems(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = lotteries.Draw()
+		_ = lotteries.Draw()
 	}
 }
 
@@ -140,7 +140,7 @@ func BenchmarkPool_LargeItems_Parallel(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			_, _ = lotteries.Draw()
+			_ = lotteries.Draw()
 		}
 	})
 }
@@ -167,7 +167,7 @@ func BenchmarkPool_RealWorldScenario(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			_, _ = lotteries.Draw()
+			_ = lotteries.Draw()
 		}
 	})
 }

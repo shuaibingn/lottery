@@ -90,11 +90,7 @@ func main() {
     }
 
     // Draw
-    result, err := lotteries.Draw()
-    if err != nil {
-        panic(err)
-    }
-
+    result := lotteries.Draw()
     fmt.Printf("Congratulations! You won: %s\n", result)
 }
 ```
@@ -133,12 +129,7 @@ func main() {
         go func(userID int) {
             defer wg.Done()
             
-            result, err := globalLotteries.Draw()
-            if err != nil {
-                fmt.Printf("User %d draw failed: %v\n", userID, err)
-                return
-            }
-            
+            result := globalLotteries.Draw()
             fmt.Printf("User %d won: %s\n", userID, result)
         }(i)
     }
@@ -180,10 +171,7 @@ lotteries, err := lottery.InitLotteriesPool(prizes, 10000)
 
 ```go
 // Execute one draw
-result, err := lotteries.Draw()
-if err != nil {
-    // Handle error
-}
+result := lotteries.Draw()
 fmt.Println("Result:", result)
 ```
 
@@ -250,7 +238,7 @@ func GetLotteries() *lottery.LotteriesPool {
 }
 
 // Use anywhere
-result, _ := GetLotteries().Draw()
+result := GetLotteries().Draw()
 ```
 
 ### 3. Reduce Prize Count
@@ -344,7 +332,7 @@ func main() {
     // Simulate 10 draws
     results := make(map[string]int)
     for i := 0; i < 10; i++ {
-        result, _ := lotteries.Draw()
+        result := lotteries.Draw()
         results[result]++
     }
 
@@ -397,7 +385,7 @@ func main() {
     lotteries, _ := lottery.NewLotteriesPool(redPackets)
 
     // Draw
-    result, _ := lotteries.Draw()
+    result := lotteries.Draw()
     fmt.Printf("Congratulations! You got: %s\n", result)
 }
 ```
@@ -473,7 +461,7 @@ if err != nil {
 ```go
 results := make(map[string]int)
 for i := 0; i < 100000; i++ {
-    result, _ := lotteries.Draw()
+    result := lotteries.Draw()
     results[result]++
 }
 // Check distribution in results

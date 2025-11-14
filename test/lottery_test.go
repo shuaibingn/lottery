@@ -31,11 +31,7 @@ func TestDraw(t *testing.T) {
 	start := time.Now().UnixNano()
 	result := make(map[string]int)
 	for i := 0; i < 100000; i++ {
-		id, err := lotteries.Draw()
-		if err != nil {
-			t.Errorf("Draw failed: %v", err)
-			continue
-		}
+		id := lotteries.Draw()
 		if _, ok := result[id]; ok {
 			result[id]++
 			continue
@@ -64,11 +60,7 @@ func TestDrawPool(t *testing.T) {
 	start := time.Now().UnixNano()
 	result := make(map[string]int)
 	for i := 0; i < 100000; i++ {
-		id, err := lotteries.Draw()
-		if err != nil {
-			t.Errorf("Draw failed: %v", err)
-			continue
-		}
+		id := lotteries.Draw()
 		if _, ok := result[id]; ok {
 			result[id]++
 			continue
@@ -106,10 +98,7 @@ func TestDrawPoolConcurrent(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < drawsPerWorker; j++ {
-				_, err := lotteries.Draw()
-				if err != nil {
-					t.Errorf("Draw failed: %v", err)
-				}
+				_ = lotteries.Draw()
 			}
 		}()
 	}

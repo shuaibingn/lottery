@@ -90,11 +90,7 @@ func main() {
     }
 
     // 开始抽奖
-    result, err := lotteries.Draw()
-    if err != nil {
-        panic(err)
-    }
-
+    result := lotteries.Draw()
     fmt.Printf("恭喜抽中：%s\n", result)
 }
 ```
@@ -133,12 +129,7 @@ func main() {
         go func(userID int) {
             defer wg.Done()
             
-            result, err := globalLotteries.Draw()
-            if err != nil {
-                fmt.Printf("用户 %d 抽奖失败: %v\n", userID, err)
-                return
-            }
-            
+            result := globalLotteries.Draw()
             fmt.Printf("用户 %d 抽中：%s\n", userID, result)
         }(i)
     }
@@ -180,10 +171,7 @@ lotteries, err := lottery.InitLotteriesPool(prizes, 10000)
 
 ```go
 // 执行一次抽奖
-result, err := lotteries.Draw()
-if err != nil {
-    // 处理错误
-}
+result := lotteries.Draw()
 fmt.Println("抽奖结果:", result)
 ```
 
@@ -250,7 +238,7 @@ func GetLotteries() *lottery.LotteriesPool {
 }
 
 // 在任何地方使用
-result, _ := GetLotteries().Draw()
+result := GetLotteries().Draw()
 ```
 
 ### 3. 减少奖项数量
@@ -344,7 +332,7 @@ func main() {
     // 模拟 10 次抽奖
     results := make(map[string]int)
     for i := 0; i < 10; i++ {
-        result, _ := lotteries.Draw()
+        result := lotteries.Draw()
         results[result]++
     }
 
@@ -397,7 +385,7 @@ func main() {
     lotteries, _ := lottery.NewLotteriesPool(redPackets)
 
     // 抽奖
-    result, _ := lotteries.Draw()
+    result := lotteries.Draw()
     fmt.Printf("恭喜获得：%s\n", result)
 }
 ```
@@ -473,7 +461,7 @@ if err != nil {
 ```go
 results := make(map[string]int)
 for i := 0; i < 100000; i++ {
-    result, _ := lotteries.Draw()
+    result := lotteries.Draw()
     results[result]++
 }
 // 检查 results 的分布
