@@ -24,80 +24,10 @@ type AliasMethodPool struct {
 // NewAliasMethodPool 创建线程安全的 Alias Method 抽奖器
 // 时间复杂度：初始化 O(n)，抽奖 O(1)
 func NewAliasMethodPool(data []Lottery) (*AliasMethodPool, error) {
-	if len(data) == 0 {
-		return nil, errors.New("lotteries must be greater than 0")
-	}
-
-	n := len(data)
-	prob := make([]float64, n)
-	alias := make([]int, n)
-	keys := make([]string, n)
-
-	// 提取概率并验证
-	sum := 0.0
-	for i, d := range data {
-		keys[i] = d.getID()
-		p := d.getProbability()
-		if p < 0 {
-			return nil, errors.New("probability cannot be negative")
-		}
-		sum += p
-	}
-
-	// 验证概率和是否接近 1.0（允许浮点误差）
-	if sum < 0.9999 || sum > 1.0001 {
-		return nil, errors.New("sum of probabilities must be approximately 1.0")
-	}
-
-	// 缩放概率（使期望值为1）
-	scaled := make([]float64, n)
-	for i, d := range data {
-		scaled[i] = d.getProbability() * float64(n) / sum
-	}
-
-	// 分离 small 和 large
-	small := make([]int, 0, n)
-	large := make([]int, 0, n)
-
-	for i, p := range scaled {
-		if p < 1.0 {
-			small = append(small, i)
-		} else {
-			large = append(large, i)
-		}
-	}
-
-	// 构建概率表和别名表
-	for len(small) > 0 && len(large) > 0 {
-		s := small[len(small)-1]
-		small = small[:len(small)-1]
-
-		l := large[len(large)-1]
-		large = large[:len(large)-1]
-
-		prob[s] = scaled[s]
-		alias[s] = l
-
-		scaled[l] = scaled[l] + scaled[s] - 1.0
-
-		if scaled[l] < 1.0 {
-			small = append(small, l)
-		} else {
-			large = append(large, l)
-		}
-	}
-
-	// 处理剩余的
-	for len(large) > 0 {
-		l := large[len(large)-1]
-		large = large[:len(large)-1]
-		prob[l] = 1.0
-	}
-
-	for len(small) > 0 {
-		s := small[len(small)-1]
-		small = small[:len(small)-1]
-		prob[s] = 1.0
+	// 构建 Alias Method 查找表
+	table, err := buildAliasTables(data)
+	if err != nil {
+		return nil, err
 	}
 
 	// 生成初始种子
@@ -107,10 +37,10 @@ func NewAliasMethodPool(data []Lottery) (*AliasMethodPool, error) {
 	}
 
 	am := &AliasMethodPool{
-		prob:  prob,
-		alias: alias,
-		keys:  keys,
-		n:     n,
+		prob:  table.prob,
+		alias: table.alias,
+		keys:  table.keys,
+		n:     table.n,
 	}
 	am.seedSource.Store(uint64(seed))
 
