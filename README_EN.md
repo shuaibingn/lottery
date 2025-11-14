@@ -60,43 +60,6 @@ go get github.com/shuaibingn/lottery
 
 ## 🎯 Quick Start
 
-### Basic Example (Recommended)
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/shuaibingn/lottery"
-)
-
-type Prize struct {
-    *lottery.DrawBase
-}
-
-func main() {
-    // Define prizes (probabilities must sum to 1)
-    prizes := []lottery.Lottery{
-        &Prize{&lottery.DrawBase{ID: "First Prize", Probability: 0.01}},   // 1%
-        &Prize{&lottery.DrawBase{ID: "Second Prize", Probability: 0.09}},  // 9%
-        &Prize{&lottery.DrawBase{ID: "Third Prize", Probability: 0.2}},    // 20%
-        &Prize{&lottery.DrawBase{ID: "Thank You", Probability: 0.7}},      // 70%
-    }
-
-    // Initialize lottery (auto-calculate precision)
-    lotteries, err := lottery.NewLotteriesPool(prizes)
-    if err != nil {
-        panic(err)
-    }
-
-    // Draw
-    result := lotteries.Draw()
-    fmt.Printf("Congratulations! You won: %s\n", result)
-}
-```
-
-### High-Concurrency Scenario (Recommended)
-
 ```go
 package main
 
@@ -106,24 +69,30 @@ import (
     "github.com/shuaibingn/lottery"
 )
 
+type Prize struct {
+    *lottery.DrawBase
+}
+
 var globalLotteries *lottery.LotteriesPool
 
 func init() {
+    // Define prizes (probabilities must sum to 1.0)
     prizes := []lottery.Lottery{
-        &Prize{&lottery.DrawBase{ID: "Grand Prize", Probability: 0.001}},
-        &Prize{&lottery.DrawBase{ID: "First Prize", Probability: 0.009}},
-        &Prize{&lottery.DrawBase{ID: "Second Prize", Probability: 0.09}},
-        &Prize{&lottery.DrawBase{ID: "Third Prize", Probability: 0.2}},
-        &Prize{&lottery.DrawBase{ID: "Thank You", Probability: 0.7}},
+        &Prize{&lottery.DrawBase{ID: "Grand Prize", Probability: 0.001}},  // 0.1%
+        &Prize{&lottery.DrawBase{ID: "First Prize", Probability: 0.009}},  // 0.9%
+        &Prize{&lottery.DrawBase{ID: "Second Prize", Probability: 0.09}},  // 9%
+        &Prize{&lottery.DrawBase{ID: "Third Prize", Probability: 0.2}},    // 20%
+        &Prize{&lottery.DrawBase{ID: "Thank You", Probability: 0.7}},      // 70%
     }
     
+    // Initialize lottery (thread-safe, high-performance)
     globalLotteries, _ = lottery.NewLotteriesPool(prizes)
 }
 
 func main() {
     var wg sync.WaitGroup
     
-    // Simulate 1000 concurrent users
+    // Simulate 1000 concurrent users drawing prizes
     for i := 0; i < 1000; i++ {
         wg.Add(1)
         go func(userID int) {
@@ -287,108 +256,6 @@ Time complexity is O(n), fewer prizes means better performance:
 - Probability precision > 1/1000000
 - Prize count > 1000 (consider tiered lottery)
 
-## 📖 Complete Examples
-
-### Example 1: Game Equipment Lottery
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/shuaibingn/lottery"
-)
-
-type Equipment struct {
-    *lottery.DrawBase
-    Quality string
-}
-
-func main() {
-    equipments := []lottery.Lottery{
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "Legendary", Probability: 0.001},
-            Quality:  "legendary",
-        },
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "Epic", Probability: 0.009},
-            Quality:  "epic",
-        },
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "Rare", Probability: 0.09},
-            Quality:  "rare",
-        },
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "Common", Probability: 0.9},
-            Quality:  "common",
-        },
-    }
-
-    lotteries, err := lottery.NewLotteriesPool(equipments)
-    if err != nil {
-        panic(err)
-    }
-
-    // Simulate 10 draws
-    results := make(map[string]int)
-    for i := 0; i < 10; i++ {
-        result := lotteries.Draw()
-        results[result]++
-    }
-
-    fmt.Println("Draw Results:")
-    for name, count := range results {
-        fmt.Printf("  %s: %d times\n", name, count)
-    }
-}
-```
-
-### Example 2: Red Packet Lottery
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/shuaibingn/lottery"
-)
-
-type RedPacket struct {
-    *lottery.DrawBase
-    Amount float64
-}
-
-func main() {
-    redPackets := []lottery.Lottery{
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "$100", Probability: 0.001},
-            Amount:   100.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "$50", Probability: 0.01},
-            Amount:   50.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "$10", Probability: 0.089},
-            Amount:   10.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "$1", Probability: 0.3},
-            Amount:   1.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "Thank You", Probability: 0.6},
-            Amount:   0,
-        },
-    }
-
-    lotteries, _ := lottery.NewLotteriesPool(redPackets)
-
-    // Draw
-    result := lotteries.Draw()
-    fmt.Printf("Congratulations! You got: %s\n", result)
-}
-```
 
 ## 🧪 Testing
 

@@ -58,44 +58,7 @@
 go get github.com/shuaibingn/lottery
 ```
 
-## 🎯 快速开始
-
-### 基础示例（推荐）
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/shuaibingn/lottery"
-)
-
-type Prize struct {
-    *lottery.DrawBase
-}
-
-func main() {
-    // 定义奖项（概率总和必须为 1）
-    prizes := []lottery.Lottery{
-        &Prize{&lottery.DrawBase{ID: "一等奖", Probability: 0.01}},   // 1%
-        &Prize{&lottery.DrawBase{ID: "二等奖", Probability: 0.09}},   // 9%
-        &Prize{&lottery.DrawBase{ID: "三等奖", Probability: 0.2}},    // 20%
-        &Prize{&lottery.DrawBase{ID: "谢谢参与", Probability: 0.7}},  // 70%
-    }
-
-    // 初始化抽奖器（自动计算精度）
-    lotteries, err := lottery.NewLotteriesPool(prizes)
-    if err != nil {
-        panic(err)
-    }
-
-    // 开始抽奖
-    result := lotteries.Draw()
-    fmt.Printf("恭喜抽中：%s\n", result)
-}
-```
-
-### 高并发场景（推荐）
+## 🎯 Quick Start
 
 ```go
 package main
@@ -106,31 +69,37 @@ import (
     "github.com/shuaibingn/lottery"
 )
 
+type Prize struct {
+    *lottery.DrawBase
+}
+
 var globalLotteries *lottery.LotteriesPool
 
 func init() {
+    // Define prizes (probabilities must sum to 1.0)
     prizes := []lottery.Lottery{
-        &Prize{&lottery.DrawBase{ID: "特等奖", Probability: 0.001}},
-        &Prize{&lottery.DrawBase{ID: "一等奖", Probability: 0.009}},
-        &Prize{&lottery.DrawBase{ID: "二等奖", Probability: 0.09}},
-        &Prize{&lottery.DrawBase{ID: "三等奖", Probability: 0.2}},
-        &Prize{&lottery.DrawBase{ID: "谢谢参与", Probability: 0.7}},
+        &Prize{&lottery.DrawBase{ID: "Grand Prize", Probability: 0.001}},  // 0.1%
+        &Prize{&lottery.DrawBase{ID: "First Prize", Probability: 0.009}},  // 0.9%
+        &Prize{&lottery.DrawBase{ID: "Second Prize", Probability: 0.09}},  // 9%
+        &Prize{&lottery.DrawBase{ID: "Third Prize", Probability: 0.2}},    // 20%
+        &Prize{&lottery.DrawBase{ID: "Thank You", Probability: 0.7}},      // 70%
     }
     
+    // Initialize lottery (thread-safe, high-performance)
     globalLotteries, _ = lottery.NewLotteriesPool(prizes)
 }
 
 func main() {
     var wg sync.WaitGroup
     
-    // 模拟 1000 个并发用户同时抽奖
+    // Simulate 1000 concurrent users drawing prizes
     for i := 0; i < 1000; i++ {
         wg.Add(1)
         go func(userID int) {
             defer wg.Done()
             
             result := globalLotteries.Draw()
-            fmt.Printf("用户 %d 抽中：%s\n", userID, result)
+            fmt.Printf("User %d won: %s\n", userID, result)
         }(i)
     }
     
@@ -287,108 +256,6 @@ result := GetLotteries().Draw()
 - 概率精度超过百万分之一
 - 奖项数量 > 1000（建议分层抽奖）
 
-## 📖 完整示例
-
-### 示例 1：游戏装备抽奖
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/shuaibingn/lottery"
-)
-
-type Equipment struct {
-    *lottery.DrawBase
-    Quality string
-}
-
-func main() {
-    equipments := []lottery.Lottery{
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "传说装备", Probability: 0.001},
-            Quality:  "legendary",
-        },
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "史诗装备", Probability: 0.009},
-            Quality:  "epic",
-        },
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "稀有装备", Probability: 0.09},
-            Quality:  "rare",
-        },
-        &Equipment{
-            DrawBase: &lottery.DrawBase{ID: "普通装备", Probability: 0.9},
-            Quality:  "common",
-        },
-    }
-
-    lotteries, err := lottery.NewLotteriesPool(equipments)
-    if err != nil {
-        panic(err)
-    }
-
-    // 模拟 10 次抽奖
-    results := make(map[string]int)
-    for i := 0; i < 10; i++ {
-        result := lotteries.Draw()
-        results[result]++
-    }
-
-    fmt.Println("抽奖结果统计：")
-    for name, count := range results {
-        fmt.Printf("  %s: %d 次\n", name, count)
-    }
-}
-```
-
-### 示例 2：红包抽奖
-
-```go
-package main
-
-import (
-    "fmt"
-    "github.com/shuaibingn/lottery"
-)
-
-type RedPacket struct {
-    *lottery.DrawBase
-    Amount float64
-}
-
-func main() {
-    redPackets := []lottery.Lottery{
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "100元", Probability: 0.001},
-            Amount:   100.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "50元", Probability: 0.01},
-            Amount:   50.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "10元", Probability: 0.089},
-            Amount:   10.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "1元", Probability: 0.3},
-            Amount:   1.0,
-        },
-        &RedPacket{
-            DrawBase: &lottery.DrawBase{ID: "谢谢参与", Probability: 0.6},
-            Amount:   0,
-        },
-    }
-
-    lotteries, _ := lottery.NewLotteriesPool(redPackets)
-
-    // 抽奖
-    result := lotteries.Draw()
-    fmt.Printf("恭喜获得：%s\n", result)
-}
-```
 
 ## 🧪 测试
 
