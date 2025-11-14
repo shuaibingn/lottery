@@ -2,83 +2,70 @@ package lottery
 
 import (
 	"errors"
-	"hash/maphash"
-	"math/rand"
+	mathrand "math/rand"
 )
 
-type Lottery interface {
-	getProbability() float64
-	getProbabilityInt64() int64
-	getID() string
-	setInt64Probability(int64)
-}
-
+// Lotteries 无锁版本抽奖器
+// 注意：此版本不是线程安全的，适用于：
+//   - 单线程场景
+//   - 每个 goroutine 独立创建实例
+//   - 外部自行处理并发控制
+//
+// 如需线程安全的高性能版本，请使用 LotteriesPool
 type Lotteries struct {
 	lotteries []Lottery
 	mul       float64
-	localRand *rand.Rand
+	localRand *mathrand.Rand
 }
 
-func (lotteries Lotteries) Draw() string {
-	var (
-		cumulativeProbability int64 = 0
-		randomNumber                = int64(lotteries.localRand.Float64() * lotteries.mul)
-	)
+// Draw 执行一次抽奖
+// 注意：此方法不是线程安全的
+func (lotteries *Lotteries) Draw() (string, error) {
+	randomNumber := int64(lotteries.localRand.Float64() * lotteries.mul)
 
+	var cumulativeProbability int64 = 0
 	for _, lottery := range lotteries.lotteries {
 		cumulativeProbability += lottery.getProbabilityInt64()
 		if randomNumber < cumulativeProbability {
-			return lottery.getID()
+			return lottery.getID(), nil
 		}
 	}
-	return ""
+	return "", errors.New("no lottery item matched, check probability configuration")
 }
 
+// NewLotteries 初始化无锁版本抽奖器（自动计算 mul）
+// mul 值会根据概率自动计算，无需手动指定
+// 注意：返回的 Lotteries 不是线程安全的
+// 如需线程安全的高性能版本，请使用 NewLotteriesPool
+func NewLotteries(data []Lottery) (*Lotteries, error) {
+	// 自动计算合适的 mul 值
+	mul, err := calculateMul(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return InitLotteries(data, mul)
+}
+
+// InitLotteries 初始化无锁版本抽奖器（手动指定 mul）
+// 推荐使用 NewLotteries，它会自动计算合适的 mul 值
+// 注意：返回的 Lotteries 不是线程安全的
+// 如需线程安全的高性能版本，请使用 InitLotteriesPool
 func InitLotteries(data []Lottery, mul float64) (*Lotteries, error) {
-	if len(data) == 0 {
-		return nil, errors.New("lotteries must be greater than 0")
+	// 验证并设置概率
+	if err := validateAndSetProbabilities(data, mul); err != nil {
+		return nil, err
 	}
 
-	var (
-		sumProbabilities int64 = 0
-		maxProbability         = 1 * int64(mul)
-	)
-
-	for _, d := range data {
-		probability := int64(d.getProbability() * mul)
-		sumProbabilities += probability
-		d.setInt64Probability(probability)
-	}
-
-	if sumProbabilities != maxProbability {
-		return nil, errors.New("cumulative probability must be approximately 1 when scaled")
+	// 生成随机种子
+	seed, err := generateSecureSeed()
+	if err != nil {
+		return nil, errors.New("failed to generate random seed: " + err.Error())
 	}
 
 	return &Lotteries{
 		lotteries: data,
 		mul:       mul,
-		localRand: rand.New(rand.NewSource(int64(new(maphash.Hash).Sum64()))),
+		localRand: mathrand.New(mathrand.NewSource(seed)),
 	}, nil
-}
-
-type DrawBase struct {
-	ID             string  `json:"id"`
-	Probability    float64 `json:"probability"`
-	intProbability int64
-}
-
-func (b *DrawBase) getProbability() float64 {
-	return b.Probability
-}
-
-func (b *DrawBase) getProbabilityInt64() int64 {
-	return b.intProbability
-}
-
-func (b *DrawBase) getID() string {
-	return b.ID
-}
-
-func (b *DrawBase) setInt64Probability(probability int64) {
-	b.intProbability = probability
 }
