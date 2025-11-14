@@ -502,7 +502,5 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 **⭐ 如果这个项目对你有帮助，请给个 Star！**
 
-**📧 联系方式**: [your-email@example.com](mailto:your-email@example.com)
-
 **🔗 相关链接**:
 - [English Documentation](README_EN.md)

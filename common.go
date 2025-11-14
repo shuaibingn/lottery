@@ -6,8 +6,6 @@ import (
 	"errors"
 )
 
-// Lottery 抽奖接口
-// 所有奖项必须实现此接口
 type Lottery interface {
 	getProbability() float64
 	getProbabilityInt64() int64
@@ -15,8 +13,6 @@ type Lottery interface {
 	setInt64Probability(int64)
 }
 
-// DrawBase 抽奖基础结构体
-// 包含奖项的基本属性，可以直接嵌入使用
 type DrawBase struct {
 	ID             string  `json:"id"`
 	Probability    float64 `json:"probability"`
@@ -121,4 +117,3 @@ func validateAndSetProbabilities(data []Lottery, mul float64) error {
 
 	return nil
 }
-

@@ -502,8 +502,6 @@ Thanks to all contributors and users!
 
 **⭐ If this project helps you, please give it a Star!**
 
-**📧 Contact**: [your-email@example.com](mailto:your-email@example.com)
-
 **🔗 Links**:
 - [中文文档](README.md)
 
